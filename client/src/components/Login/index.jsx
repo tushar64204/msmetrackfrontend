@@ -1,22 +1,38 @@
-import { useState } from "react";
+// Login.js
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import styles from "./styles.module.css";
+import hooshopLogo from './logo.JPG';
 
 const Login = () => {
 	const [data, setData] = useState({ email: "", password: "" });
 	const [error, setError] = useState("");
+	const location = useLocation();
+
+	useEffect(() => {
+		const queryParams = new URLSearchParams(location.search);
+		const email = queryParams.get("email");
+		const password = queryParams.get("password");
+		if (email && password) {
+			setData({ email, password });
+			handleSubmit(); // Auto-submit form
+		}
+	}, [location.search]);
+	
 
 	const handleChange = ({ currentTarget: input }) => {
 		setData({ ...data, [input.name]: input.value });
 	};
 
 	const handleSubmit = async (e) => {
-		e.preventDefault();
+		if (e) e.preventDefault(); // Allow auto-submit without triggering default action
 		try {
 			const url = "http://localhost:8080/api/auth";
 			const { data: res } = await axios.post(url, data);
-			localStorage.setItem("token", res.data);
+			localStorage.setItem("token", res.data.token);
+			localStorage.setItem("employeeId", data.email); // Store employeeId
+			localStorage.setItem("useremail", data.email); // Store useremail
 			window.location = "/";
 		} catch (error) {
 			if (
@@ -37,7 +53,7 @@ const Login = () => {
 						<h1>Login to Your Account</h1>
 						<input
 							type="email"
-							placeholder="Email"
+							placeholder="Employee ID"
 							name="email"
 							onChange={handleChange}
 							value={data.email}
@@ -55,17 +71,13 @@ const Login = () => {
 						/>
 						{error && <div className={styles.error_msg}>{error}</div>}
 						<button type="submit" className={styles.green_btn}>
-							Sing In
+							Sign In
 						</button>
 					</form>
 				</div>
 				<div className={styles.right}>
-					<h1>New Here ?</h1>
-					<Link to="/signup">
-						<button type="button" className={styles.white_btn}>
-							Sing Up
-						</button>
-					</Link>
+					<img src={hooshopLogo} alt="Hooshop Logo" className={styles.company_logo} />
+					<h2 className={styles.slogan}>📈 Digital Bnega Bharat: Save Trees, Say Goodbye to Paper, Hello to Hooshop🌳</h2>
 				</div>
 			</div>
 		</div>
